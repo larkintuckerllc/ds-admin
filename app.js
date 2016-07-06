@@ -1,5 +1,7 @@
 (function() {
   'use strict';
+  var ADMIN_USER = 'larkintuckerllc';
+  var ADMIN_REPO = 'ds-admin';
   // var BASE = 'http://localhost'; // DEV
   var BASE = 'http://192.168.1.2'; // PROD
   var thr0w = window.thr0w;
@@ -35,25 +37,33 @@
             var app;
             var appEl;
             var appsEl = document.getElementById('authorized__apps');
+            var html = '';
             for (i = 0; i < apps.length; i++) {
               app = apps[i];
               appEl = document.createElement('li');
               appEl.classList.add('panel');
               appEl.classList.add('panel-default');
-              appEl.innerHTML = [
+              html = [
                 '<div class="panel-heading">',
                 '<span class="badge pull-right">' + app.user + '</span>',
                 '<h3 class="panel-title">' + app.repo + '</h3>',
                 '</div>',
                 '<div class="panel-body">',
-                '<p>Version: ' + app.version + '</p>',
-                '<a href="/' + app.user + '-' + app.repo +
-                  '/config/" target="_blank">Configure</a>',
-                '|',
-                '<a href="/' + app.user + '-' + app.repo +
-                  '/control/" target="_blank">Control</a>',
+                '<p>Version: ' + app.version + '</p>'
+              ].join('\n');
+              if (!(app.user === ADMIN_USER && app.repo === ADMIN_REPO)) {
+                html += [
+                  '<a href="/' + app.user + '-' + app.repo +
+                    '/config/" target="_blank">Configure</a>',
+                  '|',
+                  '<a href="/' + app.user + '-' + app.repo +
+                    '/control/" target="_blank">Control</a>',
+                ].join('\n');
+              }
+              html += [
                 '</div>'
               ].join('\n');
+              appEl.innerHTML = html;
               appsEl.appendChild(appEl);
             }
           }
