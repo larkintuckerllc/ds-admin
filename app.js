@@ -2,14 +2,14 @@
   'use strict';
   var ADMIN_USER = 'larkintuckerllc';
   var ADMIN_REPO = 'ds-admin';
-  // var BASE = 'http://localhost'; // DEV
-  var BASE = 'http://192.168.1.2'; // PROD
   var thr0w = window.thr0w;
   var ds = window.ds;
   document.addEventListener('DOMContentLoaded', ready);
   function ready() {
-    thr0w.setBase(BASE);
-    ds.setBase(BASE);
+    var base = window.location.protocol + '//' +
+      window.location.hostname;
+    thr0w.setBase(base);
+    ds.setBase(base);
     if (window.localStorage.getItem('logout')) {
       window.localStorage.removeItem('logout');
       thr0w.logout();
@@ -73,7 +73,7 @@
           }
           function list(callback) {
             var xmlhttp = new XMLHttpRequest();
-            xmlhttp.open('POST', BASE + ':3010/api/list', true);
+            xmlhttp.open('POST', base + ':3010/api/list', true);
             xmlhttp.setRequestHeader('Authorization',
               'bearer ' + dsToken);
             xmlhttp.setRequestHeader('Content-type',
