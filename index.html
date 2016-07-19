@@ -20,12 +20,23 @@
       <div class="row">
         <div class="col-xs-12">
         <div id="authorized" style="display: none;">
+          <div id="authorized__server_out_of_date" style="display: none;"
+            class="alert alert-warning" role="alert">Server out of date.</div>
           <ul id="authorized__apps">
           </ul>
-          <button id="authorized__logout" class="btn btn-default">Logout</button>
+          <div id="authorized__fail" style="display: none;"
+            class="alert alert-danger" role="alert">Check failed.</div>
+          <div class="form-group">
+            <button id="authorized__check" class="btn btn-default">Check for Updates</button>
+          </div>
+          <div class="form-group">
+            <button id="authorized__logout" class="btn btn-default">Logout</button>
+          </div>
         </div>
       </div>
     </div>
+  <script src="bower_components/jquery/dist/jquery.min.js"></script>
+  <script src="bower_components/octokat/dist/octokat.js"></script>
   <script src="bower_components/ds-client/dist/ds-base.js"></script>
   <script src="bower_components/thr0w-client/dist/thr0w-base.js"></script>
   <script src="app.js"></script>
