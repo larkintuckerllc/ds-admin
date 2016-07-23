@@ -23,6 +23,7 @@
     "bootstrap": "^3.3.6",
     "ds-client": "^0.1.2",
     "thr0w-client": "^2.1.2",
-    "octokat": "^0.4.17"
+    "octokat": "^0.4.17",
+    "lodash": "^4.13.1"
   }
 }
