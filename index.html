@@ -12,13 +12,13 @@
 </head>
 <body>
   <div class="panel panel-default">
-      <div class="panel-heading">
-        <h3 class="panel-title">Administration</h3>
-      </div>
+    <div class="panel-heading">
+      <h3 class="panel-title">Administration</h3>
     </div>
-    <div class="container-fluid">
-      <div class="row">
-        <div class="col-xs-12">
+  </div>
+  <div class="container-fluid">
+    <div class="row">
+      <div class="col-xs-12">
         <div id="authorized" style="display: none;">
           <!-- BREAKING FROM BEM AS TOO LONG -->
           <div id="server_out_of_date" style="display: none;"
@@ -27,6 +27,8 @@
           </ul>
           <div id="fail" style="display: none;"
             class="alert alert-danger" role="alert">Check failed.</div>
+          <div id="up_to_date" style="display: none;"
+            class="alert alert-success" role="alert">Everything up to date.</div>
           <div id="progress" style="display: none;" class="progress">
             <div class="progress-bar progress-bar-striped active"
               role="progressbar"  style="width: 100%"></div>
@@ -34,12 +36,39 @@
           <div id="check" class="form-group">
             <button id="check__btn" class="btn btn-default">Check for Updates</button>
           </div>
+          <div id="install" class="panel panel-default">
+            <div class="panel-heading">
+              <h3 class="panel-title">Install Application</h3>
+            </div>
+            <div class="panel-body">
+              <div id="install__form">
+                <div class="form-group">
+                  <label for="install__form__user">Username</label>
+                  <input type="text" class="form-control" id="install__form__user" placeholder="username">
+                </div>
+                <div class="form-group">
+                  <label for="install__form__repo">Repository Name</label>
+                  <input type="text" class="form-control" id="install__form__repo" placeholder="name">
+                </div>
+                <div id="install__form__fail" style="display: none;"
+                  class="alert alert-danger" role="alert">Install failed.</div>
+                <div class="form-group">
+                  <button id="install__form__btn" class="btn btn-default">Install</button>
+                </div>
+              </div>
+              <div id="install__progress" style="display: none;" class="progress">
+                <div class="progress-bar progress-bar-striped active"
+                  role="progressbar"  style="width: 100%"></div>
+              </div>
+            </div>
+          </div>
           <div class="form-group">
             <button id="logout" class="btn btn-default">Logout</button>
           </div>
         </div>
       </div>
     </div>
+  </div>
   <script src="bower_components/jquery/dist/jquery.min.js"></script>
   <script src="bower_components/lodash/dist/lodash.min.js"></script>
   <script src="bower_components/octokat/dist/octokat.js"></script>

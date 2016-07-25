@@ -34,17 +34,19 @@
           var app;
           var i;
           var octo = new Octokat();
-          var failEl = document
-            .getElementById('fail');
-          var serverOutOfDateEl = document
-            .getElementById('server_out_of_date');
+          var checkEl = document.getElementById('check');
+          var installEl = document.getElementById('install');
+          var failEl = document.getElementById('fail');
+          var serverOutOfDateEl = document.getElementById('server_out_of_date');
           var dsToken = ds.getToken();
           listApps(handleListApps);
           document.getElementById('authorized').style.display = 'block';
           document.getElementById('check__btn')
-            .addEventListener('click', handleAuthorizedCheckClick);
+            .addEventListener('click', handleCheckClick);
           document.getElementById('logout')
-            .addEventListener('click', handleAuthorizedLogoutClick);
+            .addEventListener('click', handleLogoutClick);
+          document.getElementById('install__form__btn')
+            .addEventListener('click', handleInstallFormBtnClick);
           function handleListApps(listErr, list) {
             if (listErr !== null) {
               throw 500;
@@ -209,82 +211,66 @@
               }
             }
           }
-          function handleAuthorizedCheckClick() {
-            var checkEl = document.getElementById(
-              'check');
+          function handleCheckClick() {
+            var i;
+            var appsLength = apps.length;
+            var appsChecked = 0;
+            var appCheckedErr = null;
+            var appsOutOfDate = {};
             var progressEl = document.getElementById(
               'progress');
             checkEl.style.display = 'none';
             progressEl.style.display = 'block';
-            getServerVersions(handleServerVersions);
-            function handleServerVersions(serverVersionsErr,
-              serverVersions) {
-              if (serverVersionsErr !== null) {
+            checkServerVersion(handleCheckServerVersion);
+            function handleCheckServerVersion(checkServerVersionErr,
+              serverOutOfDate) {
+              if (checkServerVersionErr !== null) {
                 displayErr();
                 return;
               }
               failEl.style.display = 'none';
-              octo.repos(DS_SERVER_USER, DS_SERVER_REPO)
-                .releases.latest.fetch(handleDsLatestRelease);
-              function handleDsLatestRelease(dsLatestReleaseErr,
-                dsLatestRelease) {
-                if (dsLatestReleaseErr !== null) {
-                  displayErr();
-                  return;
-                }
-                octo.repos(THR0W_SERVER_USER, THR0W_SERVER_REPO)
-                  .releases.latest.fetch(handleThr0wLatestRelease);
-                function handleThr0wLatestRelease(thr0wLatestReleaseErr,
-                  thr0wLatestRelease) {
-                  var i;
-                  var appsLength = apps.length;
-                  var appsChecked = 0;
-                  var appCheckedErr = null;
-                  var appsOutOfDate = {};
-                  if (thr0wLatestReleaseErr !== null) {
-                    displayErr();
-                    return;
+              if (serverOutOfDate) {
+                // TODO: IMPLEMENT MECH TO UDATE SERVER
+                installEl.style.display = 'none';
+                progressEl.style.display = 'none';
+                serverOutOfDateEl.style.display = 'block';
+                return;
+              }
+              for (i = 0; i < appsLength; i++) {
+                checkAppVersion(apps[i]);
+              }
+              function checkAppVersion(app) {
+                octo.repos(app.user, app.repo)
+                  .releases.latest.fetch(handleAppLatestRelease);
+                function handleAppLatestRelease(appLatestReleaseErr,
+                  appLatestRelease) {
+                  var j;
+                  var appUserRepo;
+                  var upToDate = true;
+                  if (appLatestReleaseErr !== null) {
+                    appCheckedErr = true;
                   }
-                  if (serverVersions.dsServerVersion !==
-                    dsLatestRelease.tagName ||
-                    serverVersions.thr0wServerVersion !==
-                    thr0wLatestRelease.tagName) {
-                    serverOutOfDateEl.style.display = 'block';
+                  appsOutOfDate[app.user + '-' + app.repo] =
+                    (app.version !== appLatestRelease.tagName);
+                  ++appsChecked;
+                  if (appsChecked === appsLength) {
+                    if (appCheckedErr !== null) {
+                      displayErr();
+                      return;
+                    }
                     progressEl.style.display = 'none';
-                    // TODO: IMPLEMENT MECH TO UPDATE SERVER
-                    return;
-                  }
-                  for (i = 0; i < appsLength; i++) {
-                    checkAppVersion(apps[i]);
-                  }
-                  function checkAppVersion(app) {
-                    octo.repos(app.user, app.repo)
-                      .releases.latest.fetch(handleAppLatestRelease);
-                    function handleAppLatestRelease(appLatestReleaseErr,
-                      appLatestRelease) {
-                      var j;
-                      var appUserRepo;
-                      if (appLatestReleaseErr !== null) {
-                        appCheckedErr = true;
+                    for (j = 0; j < apps.length; j++) {
+                      appUserRepo = apps[j].user + '-' + apps[j].repo;
+                      if (appsOutOfDate[appUserRepo]) {
+                        upToDate = false;
+                        document.getElementById(
+                          'apps__' + appUserRepo +
+                          '__current__out_of_date').style.display = 'block';
                       }
-                      appsOutOfDate[app.user + '-' + app.repo] =
-                        (app.version !== appLatestRelease.tagName);
-                      ++appsChecked;
-                      if (appsChecked === appsLength) {
-                        if (appCheckedErr !== null) {
-                          displayErr();
-                          return;
-                        }
-                        progressEl.style.display = 'none';
-                        for (j = 0; j < apps.length; j++) {
-                          appUserRepo = apps[j].user + '-' + apps[j].repo;
-                          if (appsOutOfDate[appUserRepo]) {
-                            document.getElementById(
-                              'apps__' + appUserRepo +
-                              '__current__out_of_date').style.display = 'block';
-                          }
-                        }
-                      }
+                    }
+                    if (upToDate) {
+                      document.getElementById('up_to_date')
+                        .style.display = 'block';
                     }
                   }
                 }
@@ -295,31 +281,42 @@
               progressEl.style.display = 'none';
               checkEl.style.display = 'block';
             }
-            function getServerVersions(callback) {
-              var xmlhttp = new XMLHttpRequest();
-              xmlhttp.open('POST', base + ':3010/api/server_versions', true);
-              xmlhttp.setRequestHeader('Authorization',
-                'bearer ' + dsToken);
-              xmlhttp.setRequestHeader('Content-type',
-                'application/json');
-              xmlhttp.onreadystatechange = handleOnreadystatechange;
-              xmlhttp.send(JSON.stringify({}));
-              function handleOnreadystatechange() {
-                if (xmlhttp.readyState !== 4) {
-                  return;
-                }
-                if (xmlhttp.status !== 200) {
-                  return callback(xmlhttp.status ? xmlhttp.status : 500);
-                }
-                try {
-                  return callback(null, JSON.parse(xmlhttp.responseText));
-                } catch (error) {
-                  return callback(500);
-                }
+          }
+          function handleInstallFormBtnClick() {
+            var installFormEl = document.getElementById(
+              'install__form');
+            var installProgressEl = document.getElementById(
+              'install__progress');
+            var installFormFailEl = document.getElementById(
+              'install__form__fail');
+            // TODO: VALIDATE FIELDS
+            installFormEl.style.display = 'none';
+            installProgressEl.style.display = 'block';
+            checkServerVersion(handleCheckServerVersion);
+            function handleCheckServerVersion(checkServerVersionErr,
+              serverOutOfDate) {
+              if (checkServerVersionErr !== null) {
+                displayErr();
+                return;
               }
+              installFormFailEl.style.display = 'none';
+              if (serverOutOfDate) {
+                installProgressEl.style.display = 'none';
+                installEl.style.display = 'none';
+                checkEl.style.display = 'none';
+                installFormEl.style.display = 'block';
+                serverOutOfDateEl.style.display = 'block';
+                return;
+              }
+              // TODO: IMPLEMENT INSTALL
+            }
+            function displayErr() {
+              installProgressEl.style.display = 'none';
+              installFormFailEl.style.display = 'block';
+              installFormEl.style.display = 'block';
             }
           }
-          function handleAuthorizedLogoutClick() {
+          function handleLogoutClick() {
             window.localStorage.setItem('logout', true);
             ds.logout();
           }
@@ -352,6 +349,36 @@
               }
             }
           }
+          function checkServerVersion(callback) {
+            getServerVersions(handleServerVersions);
+            function handleServerVersions(serverVersionsErr,
+              serverVersions) {
+              if (serverVersionsErr !== null) {
+                return callback(500);
+              }
+              octo.repos(DS_SERVER_USER, DS_SERVER_REPO)
+                .releases.latest.fetch(handleDsLatestRelease);
+              function handleDsLatestRelease(dsLatestReleaseErr,
+                dsLatestRelease) {
+                if (dsLatestReleaseErr !== null) {
+                  return callback(500);
+                }
+                octo.repos(THR0W_SERVER_USER, THR0W_SERVER_REPO)
+                  .releases.latest.fetch(handleThr0wLatestRelease);
+                function handleThr0wLatestRelease(thr0wLatestReleaseErr,
+                  thr0wLatestRelease) {
+                  if (thr0wLatestReleaseErr !== null) {
+                    return callback(500);
+                  }
+                  callback(null,
+                    (serverVersions.dsServerVersion !==
+                    dsLatestRelease.tagName ||
+                    serverVersions.thr0wServerVersion !==
+                    thr0wLatestRelease.tagName));
+                }
+              }
+            }
+          }
           function update(user, repo, callback) {
             var xmlhttp = new XMLHttpRequest();
             xmlhttp.open('POST', base + ':3010/api/update', true);
@@ -372,6 +399,51 @@
                 return callback(xmlhttp.status ? xmlhttp.status : 500);
               }
               return callback(null);
+            }
+          }
+          function install(user, repo, callback) {
+            var xmlhttp = new XMLHttpRequest();
+            xmlhttp.open('POST', base + ':3010/api/install', true);
+            xmlhttp.setRequestHeader('Authorization',
+              'bearer ' + dsToken);
+            xmlhttp.setRequestHeader('Content-type',
+              'application/json');
+            xmlhttp.onreadystatechange = handleOnreadystatechange;
+            xmlhttp.send(JSON.stringify({
+              user: user,
+              repo: repo
+            }));
+            function handleOnreadystatechange() {
+              if (xmlhttp.readyState !== 4) {
+                return;
+              }
+              if (xmlhttp.status !== 200) {
+                return callback(xmlhttp.status ? xmlhttp.status : 500);
+              }
+              return callback(null);
+            }
+          }
+          function getServerVersions(callback) {
+            var xmlhttp = new XMLHttpRequest();
+            xmlhttp.open('POST', base + ':3010/api/server_versions', true);
+            xmlhttp.setRequestHeader('Authorization',
+              'bearer ' + dsToken);
+            xmlhttp.setRequestHeader('Content-type',
+              'application/json');
+            xmlhttp.onreadystatechange = handleOnreadystatechange;
+            xmlhttp.send(JSON.stringify({}));
+            function handleOnreadystatechange() {
+              if (xmlhttp.readyState !== 4) {
+                return;
+              }
+              if (xmlhttp.status !== 200) {
+                return callback(xmlhttp.status ? xmlhttp.status : 500);
+              }
+              try {
+                return callback(null, JSON.parse(xmlhttp.responseText));
+              } catch (error) {
+                return callback(500);
+              }
             }
           }
         }
