@@ -96,8 +96,7 @@
                   'style="display: none;">',
                 '<div class="progress-bar progress-bar-striped active"',
                 'role="progressbar" style="width: 100%"></div>',
-                '</div>',
-                '</div>',
+                '</div>'
               ].join('\n');
               if (!(app.user === ADMIN_USER && app.repo === ADMIN_REPO)) {
                 html += [
@@ -158,8 +157,8 @@
                   }
                   listApps(handleAppUpdateListApps);
                   function handleAppUpdateListApps
-                    (appUpdateListErr, updateApps) {
-                    if (appUpdateListErr !== null) {
+                    (appUpdateListAppsErr, updateApps) {
+                    if (appUpdateListAppsErr !== null) {
                       window.clearInterval(updateProgressInterval);
                       displayAppUpdateErr();
                       return;
@@ -289,7 +288,14 @@
               'install__progress');
             var installFormFailEl = document.getElementById(
               'install__form__fail');
-            // TODO: VALIDATE FIELDS
+            var installFormUserEl = document.getElementById(
+              'install__form__user');
+            var installFormRepoEl = document.getElementById(
+              'install__form__repo');
+            var user;
+            var repo;
+            user = installFormUserEl.value;
+            repo = installFormRepoEl.value;
             installFormEl.style.display = 'none';
             installProgressEl.style.display = 'block';
             checkServerVersion(handleCheckServerVersion);
@@ -308,7 +314,52 @@
                 serverOutOfDateEl.style.display = 'block';
                 return;
               }
-              // TODO: IMPLEMENT INSTALL
+              install(user, repo, handleInstall);
+              function handleInstall(installErr) {
+                if (installErr !== null) {
+                  displayErr();
+                  return;
+                }
+                var progressCount = 0;
+                var installProgressInterval =
+                  window.setInterval(installProgress, 1000);
+                function installProgress() {
+                  progressCount++;
+                  if (progressCount === 20) {
+                    window.clearInterval(installProgressInterval);
+                    displayErr();
+                    return;
+                  }
+                  listApps(handleInstallListApps);
+                  function handleInstallListApps
+                    (installListAppsErr, installApps) {
+                    if (installListAppsErr !== null) {
+                      window.clearInterval(installProgressInterval);
+                      displayErr();
+                      return;
+                    }
+                    var index = _.findIndex(installApps, isRepo);
+                    if (index === -1) {
+                      window.clearInterval(installProgressInterval);
+                      displayErr();
+                      return;
+                    }
+                    if (installApps[index].version === 'failed') {
+                      window.clearInterval(installProgressInterval);
+                      displayErr();
+                      return;
+                    }
+                    if (installApps[index].version === 'installing') {
+                      return;
+                    }
+                    window.clearInterval(installProgressInterval);
+                    window.location.reload();
+                    function isRepo(obj) {
+                      return obj.user === user && obj.repo === repo;
+                    }
+                  }
+                }
+              }
             }
             function displayErr() {
               installProgressEl.style.display = 'none';
