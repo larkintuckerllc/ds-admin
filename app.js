@@ -34,9 +34,9 @@
           var app;
           var i;
           var octo = new Octokat();
-          var authorizedFailEl = document
+          var failEl = document
             .getElementById('authorized__fail');
-          var authorizedServerOutOfDateEl = document
+          var serverOutOfDateEl = document
             .getElementById('authorized__server_out_of_date');
           var dsToken = ds.getToken();
           listApps(handleListApps);
@@ -123,17 +123,17 @@
               user = this.dataset.user;
               repo = this.dataset.repo;
               /* jshint ignore:end */
-              var authorizedAppsAppCurrentEl =
+              var appsAppCurrentEl =
                 document.getElementById('authorized__apps__' +
                 user + '-' +
                 repo + '__current');
-              var authorizedAppsAppProgressEl =
+              var appsAppProgressEl =
                 document.getElementById('authorized__apps__' +
                 user + '-' +
                 repo + '__progress');
-              authorizedAppsAppCurrentEl.style.display =
+              appsAppCurrentEl.style.display =
                 'none';
-              authorizedAppsAppProgressEl.style.display =
+              appsAppProgressEl.style.display =
                 'block';
               update(user, repo, handleAppUpdate);
               function handleAppUpdate(appUpdateErr) {
@@ -181,9 +181,9 @@
                       'authorized__apps__' + user + '-' + repo +
                       '__current__version').innerHTML =
                       updateApps[index].version;
-                    authorizedAppsAppProgressEl.style.display =
+                    appsAppProgressEl.style.display =
                       'none';
-                    authorizedAppsAppCurrentEl.style.display =
+                    appsAppCurrentEl.style.display =
                       'block';
                     function isRepo(obj) {
                       return obj.user === user && obj.repo === repo;
@@ -192,24 +192,24 @@
                 }
               }
               function displayAppUpdateErr() {
-                authorizedAppsAppProgressEl.style.display =
+                appsAppProgressEl.style.display =
                   'none';
                 document.getElementById('authorized__apps__' +
                   user + '-' +
                   repo + '__current__out_of_date__fail').
                   style.display = 'block';
-                authorizedAppsAppCurrentEl.style.display =
+                appsAppCurrentEl.style.display =
                   'block';
               }
             }
           }
           function handleAuthorizedCheckClick() {
-            var authorizedCheckEl = document.getElementById(
+            var checkEl = document.getElementById(
               'authorized__check');
-            var authorizedProgressEl = document.getElementById(
+            var progressEl = document.getElementById(
               'authorized__progress');
-            authorizedCheckEl.style.display = 'none';
-            authorizedProgressEl.style.display = 'block';
+            checkEl.style.display = 'none';
+            progressEl.style.display = 'block';
             getServerVersions(handleServerVersions);
             function handleServerVersions(serverVersionsErr,
               serverVersions) {
@@ -217,7 +217,7 @@
                 displayErr();
                 return;
               }
-              authorizedFailEl.style.display = 'none';
+              failEl.style.display = 'none';
               octo.repos(DS_SERVER_USER, DS_SERVER_REPO)
                 .releases.latest.fetch(handleDsLatestRelease);
               function handleDsLatestRelease(dsLatestReleaseErr,
@@ -243,8 +243,8 @@
                     dsLatestRelease.tagName ||
                     serverVersions.thr0wServerVersion !==
                     thr0wLatestRelease.tagName) {
-                    authorizedServerOutOfDateEl.style.display = 'block';
-                    authorizedProgressEl.style.display = 'none';
+                    serverOutOfDateEl.style.display = 'block';
+                    progressEl.style.display = 'none';
                     // TODO: IMPLEMENT MECH TO UPDATE SERVER
                     return;
                   }
@@ -269,7 +269,7 @@
                           displayErr();
                           return;
                         }
-                        authorizedProgressEl.style.display = 'none';
+                        progressEl.style.display = 'none';
                         for (j = 0; j < apps.length; j++) {
                           appUserRepo = apps[j].user + '-' + apps[j].repo;
                           if (appsOutOfDate[appUserRepo]) {
@@ -285,9 +285,9 @@
               }
             }
             function displayErr() {
-              authorizedFailEl.style.display = 'block';
-              authorizedProgressEl.style.display = 'none';
-              authorizedCheckEl.style.display = 'block';
+              failEl.style.display = 'block';
+              progressEl.style.display = 'none';
+              checkEl.style.display = 'block';
             }
             function getServerVersions(callback) {
               var xmlhttp = new XMLHttpRequest();
