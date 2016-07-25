@@ -100,6 +100,9 @@
               if (!(app.user === ADMIN_USER && app.repo === ADMIN_REPO)) {
                 html += [
                   '<a href="/' + app.user + '-' + app.repo +
+                    '/restart/" target="_blank">Restart</a>',
+                  '|',
+                  '<a href="/' + app.user + '-' + app.repo +
                     '/config/" target="_blank">Configure</a>',
                   '|',
                   '<a href="/' + app.user + '-' + app.repo +
@@ -185,6 +188,9 @@
                       'none';
                     appsAppCurrentEl.style.display =
                       'block';
+                    if (user === ADMIN_USER && repo === ADMIN_REPO) {
+                      window.location.reload();
+                    }
                     function isRepo(obj) {
                       return obj.user === user && obj.repo === repo;
                     }
@@ -339,8 +345,11 @@
               } catch (error) {
                 return callback(500);
               }
-              // TODO: SORT ALPHA ON REPO
+              apps = _.sortBy(apps, byRepo);
               return callback(null, apps);
+              function byRepo(o) {
+                return o.repo;
+              }
             }
           }
           function update(user, repo, callback) {
