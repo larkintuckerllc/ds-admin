@@ -65,28 +65,37 @@
                 '<h3 class="panel-title">' + app.repo + '</h3>',
                 '</div>',
                 '<div class="panel-body">',
+                '<div id="authorized__apps__' +
+                  app.user + '-' + app.repo + '__current">',
                 '<p>Version: <span id="authorized__apps__' +
-                  app.user + '-' + app.repo + '__version">' +
+                  app.user + '-' + app.repo + '__current__version">' +
                   app.version + '</span></p>',
                 '<div id="authorized__apps__' + app.user + '-' +
-                  app.repo + '__out_of_date" style="display: none;">',
+                  app.repo + '__current__out_of_date" style="display: none;">',
                 '<div class="alert alert-warning" role="alert">' +
                   'App out of date.</div>',
                 '<div id="authorized__apps__' + app.user + '-' +
-                  app.repo + '__out_of_date__progress" ' +
-                  'style="display: none;" class="progress">',
-                '<div class="progress-bar progress-bar-striped active"',
-                'role="progressbar"  style="width: 100%"></div>',
-                '</div>',
+                  app.repo +
+                  '__current__out_of_date__fail" style="display: none;" ' +
+                  'class="alert alert-danger" role="alert" ',
+                  '>Update failed.</div>',
                 '<div class="form-group">',
                 '<button id="authorized__apps__' +
                   app.user + '-' + app.repo +
-                  '__out_of_date__btn" class="btn btn-default" ' +
+                  '__current__out_of_date__btn" class="btn btn-default" ' +
                   'data-user="' + app.user +
                   '" data-repo="' + app.repo + '">' +
                   'Update</button>',
                 '</div>',
-                '</div>'
+                '</div>',
+                '</div>',
+                '<div id="authorized__apps__' +
+                  app.user + '-' + app.repo + '__progress" class="progress" ' +
+                  'style="display: none;">',
+                '<div class="progress-bar progress-bar-striped active"',
+                'role="progressbar" style="width: 100%"></div>',
+                '</div>',
+                '</div>',
               ].join('\n');
               if (!(app.user === ADMIN_USER && app.repo === ADMIN_REPO)) {
                 html += [
@@ -104,75 +113,93 @@
               appsEl.appendChild(appEl);
               document.getElementById('authorized__apps__' +
                 app.user + '-' + app.repo +
-                '__out_of_date__btn')
-                .addEventListener('click', handleAppOutOfDateClick);
+                '__current__out_of_date__btn')
+                .addEventListener('click', handleAppCurrentOutOfDateClick);
             }
-            function handleAppOutOfDateClick() {
+            function handleAppCurrentOutOfDateClick() {
               var user;
               var repo;
               /* jshint ignore:start */
               user = this.dataset.user;
               repo = this.dataset.repo;
-              this.style.display = 'none';
               /* jshint ignore:end */
-              var authorizedAppsAppOutOfDateProgressEl =
+              var authorizedAppsAppCurrentEl =
                 document.getElementById('authorized__apps__' +
                 user + '-' +
-                repo + '__out_of_date__progress');
-              authorizedAppsAppOutOfDateProgressEl.style.display = 'block';
+                repo + '__current');
+              var authorizedAppsAppProgressEl =
+                document.getElementById('authorized__apps__' +
+                user + '-' +
+                repo + '__progress');
+              authorizedAppsAppCurrentEl.style.display =
+                'none';
+              authorizedAppsAppProgressEl.style.display =
+                'block';
               update(user, repo, handleAppUpdate);
               function handleAppUpdate(appUpdateErr) {
-                var progressCount = 0;
-                var updateProgressInterval;
-                if (appUpdateErr) {
-                  // TODO: IMPLEMENT ERROR UI
-                  restoreAppUI();
+                if (appUpdateErr !== null) {
+                  displayAppUpdateErr();
                   return;
                 }
-                updateProgressInterval =
+                var progressCount = 0;
+                var updateProgressInterval =
                   window.setInterval(updateProgress, 1000);
                 function updateProgress() {
                   progressCount++;
-                  if (progressCount === 10) {
-                    failed();
+                  if (progressCount === 20) {
+                    window.clearInterval(updateProgressInterval);
+                    displayAppUpdateErr();
                     return;
                   }
                   listApps(handleAppUpdateListApps);
-                }
-                function failed() {
-                  window.clearInterval(updateProgressInterval);
-                  // TODO: IMPLMENT ERROR UI
-                }
-                function handleAppUpdateListApps(appUpdateListErr, updateApps) {
-                  if (appUpdateListErr) {
-                    // TODO: IMPLEMENT ERROR UI
-                    restoreAppUI();
-                    return;
+                  function handleAppUpdateListApps
+                    (appUpdateListErr, updateApps) {
+                    if (appUpdateListErr !== null) {
+                      window.clearInterval(updateProgressInterval);
+                      displayAppUpdateErr();
+                      return;
+                    }
+                    var index = _.findIndex(updateApps, isRepo);
+                    if (index === -1) {
+                      window.clearInterval(updateProgressInterval);
+                      displayAppUpdateErr();
+                      return;
+                    }
+                    if (updateApps[index].version === 'failed') {
+                      window.clearInterval(updateProgressInterval);
+                      displayAppUpdateErr();
+                      return;
+                    }
+                    if (updateApps[index].version === 'installing') {
+                      return;
+                    }
+                    window.clearInterval(updateProgressInterval);
+                    document.getElementById(
+                      'authorized__apps__' + user + '-' + repo +
+                      '__current__out_of_date').style.display = 'none';
+                    document.getElementById(
+                      'authorized__apps__' + user + '-' + repo +
+                      '__current__version').innerHTML =
+                      updateApps[index].version;
+                    authorizedAppsAppProgressEl.style.display =
+                      'none';
+                    authorizedAppsAppCurrentEl.style.display =
+                      'block';
+                    function isRepo(obj) {
+                      return obj.user === user && obj.repo === repo;
+                    }
                   }
-                  var index = _.findIndex(updateApps, isRepo);
-                  if (index === -1) {
-                    // TODO: IMPLEMENT ERROR UI
-                    restoreAppUI();
-                    return;
-                  }
-                  window.clearInterval(updateProgressInterval);
-                  restoreAppUI();
-                  document.getElementById('authorized__apps__' +
-                    user + '-' +
-                    repo + '__version').innerHTML = updateApps[index].version;
-                  function isRepo(obj) {
-                    return obj.user === user && obj.repo === repo;
-                  }
                 }
-                function restoreAppUI() {
-                  document.getElementById('authorized__apps__' +
-                    user + '-' +
-                    repo + '__out_of_date').style.display = 'none';
-                  authorizedAppsAppOutOfDateProgressEl.style.display = 'none';
-                  document.getElementById('authorized__apps__' +
-                    user + '-' +
-                    repo + '__out_of_date__btn').style.display = 'block';
-                }
+              }
+              function displayAppUpdateErr() {
+                authorizedAppsAppProgressEl.style.display =
+                  'none';
+                document.getElementById('authorized__apps__' +
+                  user + '-' +
+                  repo + '__current__out_of_date__fail').
+                  style.display = 'block';
+                authorizedAppsAppCurrentEl.style.display =
+                  'block';
               }
             }
           }
@@ -245,11 +272,10 @@
                         authorizedProgressEl.style.display = 'none';
                         for (j = 0; j < apps.length; j++) {
                           appUserRepo = apps[j].user + '-' + apps[j].repo;
-                          // TODO: REVERSE LOGIC HERE
-                          if (!appsOutOfDate[appUserRepo]) {
+                          if (appsOutOfDate[appUserRepo]) {
                             document.getElementById(
                               'authorized__apps__' + appUserRepo +
-                              '__out_of_date').style.display = 'block';
+                              '__current__out_of_date').style.display = 'block';
                           }
                         }
                       }
