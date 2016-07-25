@@ -35,22 +35,22 @@
           var i;
           var octo = new Octokat();
           var failEl = document
-            .getElementById('authorized__fail');
+            .getElementById('fail');
           var serverOutOfDateEl = document
-            .getElementById('authorized__server_out_of_date');
+            .getElementById('server_out_of_date');
           var dsToken = ds.getToken();
           listApps(handleListApps);
           document.getElementById('authorized').style.display = 'block';
-          document.getElementById('authorized__check__btn')
+          document.getElementById('check__btn')
             .addEventListener('click', handleAuthorizedCheckClick);
-          document.getElementById('authorized__logout')
+          document.getElementById('logout')
             .addEventListener('click', handleAuthorizedLogoutClick);
           function handleListApps(listErr, list) {
             if (listErr !== null) {
               throw 500;
             }
             var appEl;
-            var appsEl = document.getElementById('authorized__apps');
+            var appsEl = document.getElementById('apps');
             var html = '';
             apps = list;
             for (i = 0; i < apps.length; i++) {
@@ -59,28 +59,28 @@
               appEl.classList.add('panel');
               appEl.classList.add('panel-default');
               html = [
-                '<div id="authorized__apps__' + app.user + '-' + app.repo +
+                '<div id="apps__' + app.user + '-' + app.repo +
                   '" class="panel-heading">',
                 '<span class="badge pull-right">' + app.user + '</span>',
                 '<h3 class="panel-title">' + app.repo + '</h3>',
                 '</div>',
                 '<div class="panel-body">',
-                '<div id="authorized__apps__' +
+                '<div id="apps__' +
                   app.user + '-' + app.repo + '__current">',
-                '<p>Version: <span id="authorized__apps__' +
+                '<p>Version: <span id="apps__' +
                   app.user + '-' + app.repo + '__current__version">' +
                   app.version + '</span></p>',
-                '<div id="authorized__apps__' + app.user + '-' +
+                '<div id="apps__' + app.user + '-' +
                   app.repo + '__current__out_of_date" style="display: none;">',
                 '<div class="alert alert-warning" role="alert">' +
                   'App out of date.</div>',
-                '<div id="authorized__apps__' + app.user + '-' +
+                '<div id="apps__' + app.user + '-' +
                   app.repo +
                   '__current__out_of_date__fail" style="display: none;" ' +
                   'class="alert alert-danger" role="alert" ',
                   '>Update failed.</div>',
                 '<div class="form-group">',
-                '<button id="authorized__apps__' +
+                '<button id="apps__' +
                   app.user + '-' + app.repo +
                   '__current__out_of_date__btn" class="btn btn-default" ' +
                   'data-user="' + app.user +
@@ -89,7 +89,7 @@
                 '</div>',
                 '</div>',
                 '</div>',
-                '<div id="authorized__apps__' +
+                '<div id="apps__' +
                   app.user + '-' + app.repo + '__progress" class="progress" ' +
                   'style="display: none;">',
                 '<div class="progress-bar progress-bar-striped active"',
@@ -111,7 +111,7 @@
               ].join('\n');
               appEl.innerHTML = html;
               appsEl.appendChild(appEl);
-              document.getElementById('authorized__apps__' +
+              document.getElementById('apps__' +
                 app.user + '-' + app.repo +
                 '__current__out_of_date__btn')
                 .addEventListener('click', handleAppCurrentOutOfDateClick);
@@ -124,11 +124,11 @@
               repo = this.dataset.repo;
               /* jshint ignore:end */
               var appsAppCurrentEl =
-                document.getElementById('authorized__apps__' +
+                document.getElementById('apps__' +
                 user + '-' +
                 repo + '__current');
               var appsAppProgressEl =
-                document.getElementById('authorized__apps__' +
+                document.getElementById('apps__' +
                 user + '-' +
                 repo + '__progress');
               appsAppCurrentEl.style.display =
@@ -175,10 +175,10 @@
                     }
                     window.clearInterval(updateProgressInterval);
                     document.getElementById(
-                      'authorized__apps__' + user + '-' + repo +
+                      'apps__' + user + '-' + repo +
                       '__current__out_of_date').style.display = 'none';
                     document.getElementById(
-                      'authorized__apps__' + user + '-' + repo +
+                      'apps__' + user + '-' + repo +
                       '__current__version').innerHTML =
                       updateApps[index].version;
                     appsAppProgressEl.style.display =
@@ -194,7 +194,7 @@
               function displayAppUpdateErr() {
                 appsAppProgressEl.style.display =
                   'none';
-                document.getElementById('authorized__apps__' +
+                document.getElementById('apps__' +
                   user + '-' +
                   repo + '__current__out_of_date__fail').
                   style.display = 'block';
@@ -205,9 +205,9 @@
           }
           function handleAuthorizedCheckClick() {
             var checkEl = document.getElementById(
-              'authorized__check');
+              'check');
             var progressEl = document.getElementById(
-              'authorized__progress');
+              'progress');
             checkEl.style.display = 'none';
             progressEl.style.display = 'block';
             getServerVersions(handleServerVersions);
@@ -274,7 +274,7 @@
                           appUserRepo = apps[j].user + '-' + apps[j].repo;
                           if (appsOutOfDate[appUserRepo]) {
                             document.getElementById(
-                              'authorized__apps__' + appUserRepo +
+                              'apps__' + appUserRepo +
                               '__current__out_of_date').style.display = 'block';
                           }
                         }
