@@ -4,7 +4,7 @@
     "John Tucker <john@larkintuckerllc.com>"
   ],
   "description": "",
-  "version": "0.0.7",
+  "version": "0.0.8",
   "main": "",
   "license": "LicenseRef-LICENSE",
   "homepage": "",
@@ -21,7 +21,7 @@
   },
   "dependencies": {
     "bootstrap": "^3.3.6",
-    "ds-client": "^0.1.2",
+    "ds-client": "^0.2.0",
     "thr0w-client": "^2.1.2",
     "octokat": "^0.4.17",
     "lodash": "^4.13.1"

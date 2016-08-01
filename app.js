@@ -46,12 +46,12 @@
             .addEventListener('click', handleLogoutClick);
           document.getElementById('install__form__btn')
             .addEventListener('click', handleInstallFormBtnClick);
-          getStartup(handleGetStartup);
+          ds.getStartup(handleGetStartup);
           function handleGetStartup(getStartupErr, startupUrl) {
             if (getStartupErr) {
               throw 500;
             }
-            listApps(handleListApps);
+            ds.list(handleListApps);
             function handleListApps(listErr, list) {
               if (listErr !== null) {
                 throw 500;
@@ -168,7 +168,7 @@
                   'none';
                 appsAppProgressEl.style.display =
                   'block';
-                update(user, repo, handleAppUpdate);
+                ds.update(user, repo, handleAppUpdate);
                 function handleAppUpdate(appUpdateErr) {
                   if (appUpdateErr !== null) {
                     displayAppUpdateErr();
@@ -184,7 +184,7 @@
                       displayAppUpdateErr();
                       return;
                     }
-                    listApps(handleAppUpdateListApps);
+                    ds.list(handleAppUpdateListApps);
                     function handleAppUpdateListApps
                       (appUpdateListAppsErr, updateApps) {
                       if (appUpdateListAppsErr !== null) {
@@ -245,7 +245,7 @@
                 user = this.dataset.user;
                 repo = this.dataset.repo;
                 /* jshint ignore:end */
-                setStartup(user + '-' + repo + '/', handleSetStartup);
+                ds.setStartup(user + '-' + repo + '/', handleSetStartup);
                 function handleSetStartup(setStartupErr) {
                   if (setStartupErr !== null) {
                     throw 500;
@@ -359,7 +359,7 @@
                 serverOutOfDateEl.style.display = 'block';
                 return;
               }
-              install(user, repo, handleInstall);
+              ds.install(user, repo, handleInstall);
               function handleInstall(installErr) {
                 if (installErr !== null) {
                   displayErr();
@@ -375,7 +375,7 @@
                     displayErr();
                     return;
                   }
-                  listApps(handleInstallListApps);
+                  ds.list(handleInstallListApps);
                   function handleInstallListApps
                     (installListAppsErr, installApps) {
                     if (installListAppsErr !== null) {
@@ -416,80 +416,8 @@
             window.localStorage.setItem('logout', true);
             ds.logout();
           }
-          function getStartup(callback) {
-            var xmlhttp = new XMLHttpRequest();
-            xmlhttp.open('GET', base + ':3010/api/startup', true);
-            xmlhttp.setRequestHeader('Authorization',
-              'bearer ' + dsToken);
-            xmlhttp.onreadystatechange = handleOnreadystatechange;
-            xmlhttp.send();
-            function handleOnreadystatechange() {
-              if (xmlhttp.readyState !== 4) {
-                return;
-              }
-              if (xmlhttp.status !== 200) {
-                return callback(xmlhttp.status ? xmlhttp.status : 500);
-              }
-              var startupUrl;
-              try {
-                startupUrl = JSON.parse(xmlhttp.responseText).startup;
-              } catch (error) {
-                return callback(500);
-              }
-              return callback(null, startupUrl);
-            }
-          }
-          function setStartup(startupUrl, callback) {
-            var xmlhttp = new XMLHttpRequest();
-            xmlhttp.open('POST', base + ':3010/api/startup', true);
-            xmlhttp.setRequestHeader('Authorization',
-              'bearer ' + dsToken);
-            xmlhttp.setRequestHeader('Content-type',
-              'application/json');
-            xmlhttp.onreadystatechange = handleOnreadystatechange;
-            xmlhttp.send(JSON.stringify({
-              startup: startupUrl}));
-            function handleOnreadystatechange() {
-              if (xmlhttp.readyState !== 4) {
-                return;
-              }
-              if (xmlhttp.status !== 200) {
-                return callback(xmlhttp.status ? xmlhttp.status : 500);
-              }
-              return callback(null);
-            }
-          }
-          function listApps(callback) {
-            var xmlhttp = new XMLHttpRequest();
-            xmlhttp.open('POST', base + ':3010/api/list', true);
-            xmlhttp.setRequestHeader('Authorization',
-              'bearer ' + dsToken);
-            xmlhttp.setRequestHeader('Content-type',
-              'application/json');
-            xmlhttp.onreadystatechange = handleOnreadystatechange;
-            xmlhttp.send(JSON.stringify({}));
-            function handleOnreadystatechange() {
-              if (xmlhttp.readyState !== 4) {
-                return;
-              }
-              if (xmlhttp.status !== 200) {
-                return callback(xmlhttp.status ? xmlhttp.status : 500);
-              }
-              var apps;
-              try {
-                apps = JSON.parse(xmlhttp.responseText);
-              } catch (error) {
-                return callback(500);
-              }
-              apps = _.sortBy(apps, byRepo);
-              return callback(null, apps);
-              function byRepo(o) {
-                return o.repo;
-              }
-            }
-          }
           function checkServerVersion(callback) {
-            getServerVersions(handleServerVersions);
+            ds.getServerVersions(handleServerVersions);
             function handleServerVersions(serverVersionsErr,
               serverVersions) {
               if (serverVersionsErr !== null) {
@@ -515,73 +443,6 @@
                     serverVersions.thr0wServerVersion !==
                     thr0wLatestRelease.tagName));
                 }
-              }
-            }
-          }
-          function update(user, repo, callback) {
-            var xmlhttp = new XMLHttpRequest();
-            xmlhttp.open('POST', base + ':3010/api/update', true);
-            xmlhttp.setRequestHeader('Authorization',
-              'bearer ' + dsToken);
-            xmlhttp.setRequestHeader('Content-type',
-              'application/json');
-            xmlhttp.onreadystatechange = handleOnreadystatechange;
-            xmlhttp.send(JSON.stringify({
-              user: user,
-              repo: repo
-            }));
-            function handleOnreadystatechange() {
-              if (xmlhttp.readyState !== 4) {
-                return;
-              }
-              if (xmlhttp.status !== 200) {
-                return callback(xmlhttp.status ? xmlhttp.status : 500);
-              }
-              return callback(null);
-            }
-          }
-          function install(user, repo, callback) {
-            var xmlhttp = new XMLHttpRequest();
-            xmlhttp.open('POST', base + ':3010/api/install', true);
-            xmlhttp.setRequestHeader('Authorization',
-              'bearer ' + dsToken);
-            xmlhttp.setRequestHeader('Content-type',
-              'application/json');
-            xmlhttp.onreadystatechange = handleOnreadystatechange;
-            xmlhttp.send(JSON.stringify({
-              user: user,
-              repo: repo
-            }));
-            function handleOnreadystatechange() {
-              if (xmlhttp.readyState !== 4) {
-                return;
-              }
-              if (xmlhttp.status !== 200) {
-                return callback(xmlhttp.status ? xmlhttp.status : 500);
-              }
-              return callback(null);
-            }
-          }
-          function getServerVersions(callback) {
-            var xmlhttp = new XMLHttpRequest();
-            xmlhttp.open('POST', base + ':3010/api/server_versions', true);
-            xmlhttp.setRequestHeader('Authorization',
-              'bearer ' + dsToken);
-            xmlhttp.setRequestHeader('Content-type',
-              'application/json');
-            xmlhttp.onreadystatechange = handleOnreadystatechange;
-            xmlhttp.send(JSON.stringify({}));
-            function handleOnreadystatechange() {
-              if (xmlhttp.readyState !== 4) {
-                return;
-              }
-              if (xmlhttp.status !== 200) {
-                return callback(xmlhttp.status ? xmlhttp.status : 500);
-              }
-              try {
-                return callback(null, JSON.parse(xmlhttp.responseText));
-              } catch (error) {
-                return callback(500);
               }
             }
           }
