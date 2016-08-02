@@ -5,7 +5,8 @@
   "main": "index.html",
   "scripts": {
     "production": "webpack -p --config ./webpack.production.config.js",
-    "start": "webpack-dev-server"
+    "start": "webpack-dev-server",
+    "postinstall": "bower install"
   },
   "author": "",
   "license": "ISC",
@@ -23,6 +24,7 @@
     "eslint-plugin-react": "^6.0.0",
     "file-loader": "^0.9.0",
     "html-webpack-plugin": "^2.22.0",
+    "legacy-loader": "0.0.2",
     "style-loader": "^0.13.1",
     "url-loader": "^0.5.7",
     "webpack": "^1.13.1",

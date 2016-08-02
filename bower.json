@@ -1,0 +1,21 @@
+{
+  "name": "ds-admin",
+  "description": "",
+  "main": "index.html",
+  "authors": [
+    "John Tucker <john@larkintuckerllc.com>"
+  ],
+  "license": "ISC",
+  "homepage": "https://github.com/larkintuckerllc/ds-admin",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "thr0w-client": "^2.1.3",
+    "ds-client": "^0.2.0"
+  }
+}
