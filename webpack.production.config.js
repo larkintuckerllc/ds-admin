@@ -10,12 +10,15 @@ module.exports = {
     './app/index.js'
   ],
   output: {
-    path: __dirname,
+    path: __dirname + '/dist',
     filename: 'index_bundle.js'
   },
   module: {
     loaders: [
-      {test: /\.js$/, exclude: /node_modules/, loader: 'babel-loader'}
+      {test: /\.js$/, exclude: /node_modules/, loader: 'babel-loader'},
+      {test: /\.css$/, loader: 'style-loader!css-loader'},
+      {test: /\.(png|jpg|jpeg|gif|svg|woff|woff2)$/, loader: 'url-loader?limit=10000'},
+      {test: /\.(eot|ttf|wav|mp3)$/, loader: 'file-loader'}
     ]
   },
   plugins: [
