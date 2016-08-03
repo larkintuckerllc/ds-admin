@@ -5,7 +5,7 @@ require('./index.css');
 var thr0w = require('../bower_components/thr0w-client/dist/thr0w-base.js');
 var ds = require('../bower_components/ds-client/dist/ds-base.js');
 var base = window.location.protocol + '//' +
-      window.location.hostname;
+  window.location.hostname;
 thr0w.setBase(base);
 ds.setBase(base);
 if (window.localStorage.getItem('logout')) {
@@ -30,13 +30,16 @@ function loadReact() {
   var React = require('react');
   var ReactDOM = require('react-dom');
   var Navbar = require('./components/Navbar');
+  var ServersContainer = require('./containers/ServersContainer');
+  var AppsContainer = require('./containers/AppsContainer');
   var LogoutContainer = require('./containers/LogoutContainer');
   var Home = React.createClass({
     render: function() {
       return (
         <div>
           <Navbar />
-          <p>Below</p>
+          <ServersContainer />
+          <AppsContainer />
           <LogoutContainer />
         </div>
       );
