@@ -2,12 +2,7 @@ var React = require('react');
 var AdminApp = require('./AdminApp');
 var PropTypes = React.PropTypes;
 function UserApps(props) {
-  if (props.isServersLoading || props.isAppsLoading) {
-    return (
-      <div></div>
-    );
-  }
-  if (props.isErr) {
+  if (props.isServersLoading || props.isAppsLoading || props.isErr) {
     return (
       <div></div>
     );

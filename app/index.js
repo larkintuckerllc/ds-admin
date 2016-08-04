@@ -1,11 +1,18 @@
 var DS_ADMIN_USER = 'larkintuckerllc';
 var DS_ADMIN_REPO = 'ds-admin';
+var DS_SERVER_USER = 'larkintuckerllc';
+var DS_SERVER_REPO = 'ds-server';
+var THR0W_SERVER_USER = 'larkintuckerllc';
+var THR0W_SERVER_REPO = 'thr0w-server';
 require('bootstrap/dist/css/bootstrap.css');
 require('../bower_components/thr0w-client/dist/thr0w-base.css');
 require('../bower_components/ds-client/dist/ds-base.css');
 require('./index.css');
 var thr0w = require('../bower_components/thr0w-client/dist/thr0w-base.js');
 var ds = require('../bower_components/ds-client/dist/ds-base.js');
+var Octokat = require('../bower_components/octokat/dist/octokat.js');
+var find = require('lodash/find');
+var octo = new Octokat();
 var base = window.location.protocol + '//' +
   window.location.hostname;
 thr0w.setBase(base);
@@ -38,43 +45,151 @@ function loadReact() {
   var Servers = require('./components/Servers');
   var AdminApps = require('./components/AdminApps');
   var UserApps = require('./components/UserApps');
+  var Checking = require('./components/Checking');
+  var CheckServers = require('./components/CheckServers');
+  var ServersUpToDate = require('./components/ServersUpToDate');
+  var ServersOutOfDate = require('./components/ServersOutOfDate');
+  var AppsUpToDate = require('./components/AppsUpToDate');
+  var AppsOutOfDate = require('./components/AppsOutOfDate');
+  var CheckApps = require('./components/CheckApps');
   var filter = require('lodash/filter');
   var Home = React.createClass({
+    handleCheckServers: function() {
+      var dsLatestVersion;
+      var thr0wLatestVersion;
+      this.setState({
+        isChecking: true
+      });
+      getDsServerVersion.bind(this)();
+      function getDsServerVersion() {
+        octo.repos(DS_SERVER_USER, DS_SERVER_REPO)
+          .releases.latest.fetch(
+            function(err, release) {
+              if (err) {
+                this.setState({
+                  isChecking: false,
+                  isCheckingErr: true
+                });
+                return;
+              }
+              dsLatestVersion = release.tagName;
+              getThr0wServerVersion.bind(this)();
+            }.bind(this)
+          );
+      }
+      function getThr0wServerVersion() {
+        octo.repos(THR0W_SERVER_USER, THR0W_SERVER_REPO)
+          .releases.latest.fetch(
+            function(err, release) {
+              this.setState({
+                isChecking: false
+              });
+              if (err) {
+                this.setState({
+                  isCheckingErr: true
+                });
+                return;
+              }
+              thr0wLatestVersion = release.tagName;
+              check.bind(this)();
+            }.bind(this)
+          );
+      }
+      function check() {
+        var servers = this.state.servers;
+        var dsUpToDate;
+        var thr0wUpToDate;
+        dsUpToDate = (dsLatestVersion === find(servers, function(o){
+          return (o.user === DS_SERVER_USER && o.repo === DS_SERVER_REPO);
+        }).version);
+        thr0wUpToDate = (thr0wLatestVersion === find(servers, function(o){
+          return (o.user === THR0W_SERVER_USER && o.repo === THR0W_SERVER_REPO);
+        }).version);
+        this.setState({
+          isServersChecked: true,
+          isServersUpToDate: dsUpToDate && thr0wUpToDate
+        });
+      }
+    },
+    handleCheckApps: function() {
+      var i;
+      var numberOfCheckedApps = 0;
+      var appsOutOfDate = {};
+      this.setState({
+        isChecking: true
+      });
+      for (i = 0; i < this.state.apps.length; i++) {
+        checkApp.bind(this)(i);
+      }
+      function checkApp(index) {
+        var app = this.state.apps[index];
+        octo.repos(app.user, app.repo).
+          releases.latest.fetch(function(err, release) {
+            if (this.state.isCheckingErr) {
+              return;
+            }
+            if (err !== null) {
+              this.setState({
+                isChecking: false,
+                isCheckingErr: true
+              });
+              return;
+            }
+            numberOfCheckedApps++;
+            appsOutOfDate[app.user + '-' + app.repo] =
+              (app.version !== release.tagName);
+            if (numberOfCheckedApps === this.state.apps.length) {
+              check.bind(this)();
+            }
+          }.bind(this));
+      }
+      function check() {
+        var j;
+        var app;
+        var appsUpToDate = true;
+        for (j = 0; j < this.state.apps.length; j++) {
+          app = this.state.apps[j];
+          appsUpToDate = !appsOutOfDate[app.user + '-' + app.repo] ?
+            false : appsUpToDate;
+          // TODO: UPDATE APPS WITH INFO
+        }
+        this.setState({
+          isChecking: false,
+          isAppsChecked: true,
+          isAppsUpToDate: appsUpToDate
+        });
+      }
+    },
     getInitialState: function() {
       return({
         isErr: false,
         isServersLoading: true,
         isAppsLoading: true,
+        isChecking: false,
+        isCheckingErr: false,
+        isServersChecked: false,
+        isServersUpToDate: false,
+        isAppsChecked: false,
+        isAppsUpToDate: false,
         servers: [],
         apps: []
       });
     },
     componentDidMount: function () {
       ds.getServerVersions(function(err, versions) {
-        if (err !== null) {
-          this.setState({
-            isErr: true,
-            isServersLoading: false,
-            isAppsLoading: this.state.isAppsLoading,
-            servers: [],
-            apps: this.state.apps
-          });
+        this.setState({
+          isServersLoading: false
+        });
+        if (this.state.isErr) {
           return;
         }
-        if (this.state.isErr) {
+        if (err !== null) {
           this.setState({
-            isErr: true,
-            isServersLoading: false,
-            isAppsLoading: this.state.isAppsLoading,
-            servers: [],
-            apps: this.state.apps
+            isErr: true
           });
           return;
         }
         this.setState({
-          isErr: false,
-          isServersLoading: false,
-          isAppsLoading: this.state.isAppsLoading,
           servers: [
             {
               user: 'larkintuckerllc',
@@ -86,36 +201,23 @@ function loadReact() {
               repo: 'thr0w-server',
               version: versions.thr0wServerVersion
             },
-          ],
-          apps: this.state.apps
+          ]
         });
       }.bind(this));
       ds.list(function(err, list) {
-        if (err !== null) {
-          this.setState({
-            isErr: true,
-            isServersLoading: this.state.isServersLoading,
-            isAppsLoading: false,
-            servers: this.state.servers,
-            apps: []
-          });
+        this.setState({
+          isAppsLoading: false,
+        });
+        if (this.state.isErr) {
           return;
         }
-        if (this.state.isErr) {
+        if (err !== null) {
           this.setState({
-            isErr: true,
-            isServersLoading: this.state.isServersLoading,
-            isAppsLoading: false,
-            servers: this.state.servers,
-            apps: []
+            isErr: true
           });
           return;
         }
         this.setState({
-          isErr: false,
-          isServersLoading: this.state.isServersLoading,
-          isAppsLoading: false,
-          servers: this.state.servers,
           apps: list
         });
       }.bind(this));
@@ -155,6 +257,38 @@ function loadReact() {
                 return !(o.user === DS_ADMIN_USER && o.repo === DS_ADMIN_REPO);
               }
             )} />
+          <ServersUpToDate
+            isServersChecked={this.state.isServersChecked}
+            isServersUpToDate={this.state.isServersUpToDate}
+            />
+          <ServersOutOfDate
+            isServersChecked={this.state.isServersChecked}
+            isServersUpToDate={this.state.isServersUpToDate}
+            />
+          <AppsUpToDate
+            isAppsChecked={this.state.isAppsChecked}
+            isAppsUpToDate={this.state.isAppsUpToDate}
+            />
+          <AppsOutOfDate
+            isAppsChecked={this.state.isAppsChecked}
+            isAppsUpToDate={this.state.isAppsUpToDate}
+            />
+          <Checking
+            isChecking={this.state.isChecking} />
+          <CheckServers
+            isErr={this.state.isErr}
+            isServersLoading={this.state.isServersLoading}
+            isAppsLoading={this.state.isAppsLoading}
+            isChecking={this.state.isChecking}
+            isServersChecked={this.state.isServersChecked}
+            onCheckServers={this.handleCheckServers} />
+          <CheckApps
+            isServersChecked={this.state.isServersChecked}
+            isServersUpToDate={this.state.isServersUpToDate}
+            isChecking={this.state.isChecking}
+            isAppsChecked={this.state.isAppsChecked}
+            onCheckApps={this.handleCheckApps}
+            />
           <LogoutContainer />
         </div>
       );
