@@ -1,7 +1,7 @@
 var React = require('react');
 var PropTypes = React.PropTypes;
 function Loading(props) {
-  if (props.isErr || !(props.isServersLoading || props.isAppsLoading)) {
+  if (props.isLoadingErr || !(props.isServersLoading || props.isAppsLoading)) {
     return (
       <div></div>
     );
@@ -11,7 +11,7 @@ function Loading(props) {
   );
 }
 Loading.propTypes = {
-  isErr: PropTypes.bool.isRequired,
+  isLoadingErr: PropTypes.bool.isRequired,
   isServersLoading: PropTypes.bool.isRequired,
   isAppsLoading: PropTypes.bool.isRequired
 };

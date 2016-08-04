@@ -3,7 +3,7 @@ var Server = require('./Server');
 var PropTypes = React.PropTypes;
 var ServersOutOfDate = require('./ServersOutOfDate');
 function Servers(props) {
-  if (props.isServersLoading || props.isAppsLoading || props.isErr) {
+  if (props.isServersLoading || props.isAppsLoading || props.isLoadingErr) {
     return (
       <div></div>
     );
@@ -31,7 +31,7 @@ function Servers(props) {
     </div>);
 }
 Servers.propTypes = {
-  isErr: PropTypes.bool.isRequired,
+  isLoadingErr: PropTypes.bool.isRequired,
   isServersLoading: PropTypes.bool.isRequired,
   isAppsLoading: PropTypes.bool.isRequired,
   isServersChecked: PropTypes.bool.isRequired,

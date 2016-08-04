@@ -39,13 +39,14 @@ function loadReact() {
   var React = require('react');
   var ReactDOM = require('react-dom');
   var Navbar = require('./components/Navbar');
-  var Error = require('./components/Error');
+  var LoadingError = require('./components/LoadingError');
   var Loading = require('./components/Loading');
   var LogoutContainer = require('./containers/LogoutContainer');
   var Servers = require('./components/Servers');
   var AdminApps = require('./components/AdminApps');
   var UserApps = require('./components/UserApps');
   var Checking = require('./components/Checking');
+  var CheckingError = require('./components/CheckingError');
   var CheckServers = require('./components/CheckServers');
   var ServersUpToDate = require('./components/ServersUpToDate');
   var CheckApps = require('./components/CheckApps');
@@ -134,8 +135,9 @@ function loadReact() {
               return;
             }
             numberOfCheckedApps++;
+            // TODO: REVERSE LOGIC HERE
             appsOutOfDate[app.user + '-' + app.repo] =
-              (app.version !== release.tagName);
+              (app.version === release.tagName);
             if (numberOfCheckedApps === this.state.apps.length) {
               check.bind(this)();
             }
@@ -164,7 +166,7 @@ function loadReact() {
     },
     getInitialState: function() {
       return({
-        isErr: false,
+        isLoadingErr: false,
         isServersLoading: true,
         isAppsLoading: true,
         isChecking: false,
@@ -182,12 +184,12 @@ function loadReact() {
         this.setState({
           isServersLoading: false
         });
-        if (this.state.isErr) {
+        if (this.state.isLoadingErr) {
           return;
         }
         if (err !== null) {
           this.setState({
-            isErr: true
+            isLoadingErr: true
           });
           return;
         }
@@ -210,12 +212,12 @@ function loadReact() {
         this.setState({
           isAppsLoading: false,
         });
-        if (this.state.isErr) {
+        if (this.state.isLoadingErr) {
           return;
         }
         if (err !== null) {
           this.setState({
-            isErr: true
+            isLoadingErr: true
           });
           return;
         }
@@ -233,21 +235,21 @@ function loadReact() {
       return (
         <div>
           <Navbar />
-          <Error
-            isErr={this.state.isErr} />
+          <LoadingError
+            isLoadingErr={this.state.isLoadingErr} />
           <Loading
-            isErr={this.state.isErr}
+            isLoadingErr={this.state.isLoadingErr}
             isServersLoading={this.state.isServersLoading}
             isAppsLoading={this.state.isAppsLoading} />
           <Servers
-            isErr={this.state.isErr}
+            isLoadingErr={this.state.isLoadingErr}
             isServersLoading={this.state.isServersLoading}
             isAppsLoading={this.state.isAppsLoading}
             servers={this.state.servers}
             isServersChecked={this.state.isServersChecked}
             isServersUpToDate={this.state.isServersUpToDate} />
           <AdminApps
-            isErr={this.state.isErr}
+            isLoadingErr={this.state.isLoadingErr}
             isServersLoading={this.state.isServersLoading}
             isAppsLoading={this.state.isAppsLoading}
             apps={filter(
@@ -257,7 +259,7 @@ function loadReact() {
               }
             )} />
           <UserApps
-            isErr={this.state.isErr}
+            isLoadingErr={this.state.isLoadingErr}
             isServersLoading={this.state.isServersLoading}
             isAppsLoading={this.state.isAppsLoading}
             apps={filter(
@@ -274,8 +276,10 @@ function loadReact() {
             isAppsUpToDate={this.state.isAppsUpToDate} />
           <Checking
             isChecking={this.state.isChecking} />
+          <CheckingError
+            isCheckingErr={this.state.isCheckingErr} />
           <CheckServers
-            isErr={this.state.isErr}
+            isLoadingErr={this.state.isLoadingErr}
             isServersLoading={this.state.isServersLoading}
             isAppsLoading={this.state.isAppsLoading}
             isChecking={this.state.isChecking}

@@ -2,7 +2,7 @@ var React = require('react');
 var PropTypes = React.PropTypes;
 function CheckServers(props) {
   if (props.isServersLoading || props.isAppsLoading
-    || props.isErr || props.isChecking || props.isServersChecked) {
+    || props.isLoadingErr || props.isChecking || props.isServersChecked) {
     return (
       <div></div>
     );
@@ -20,7 +20,7 @@ function CheckServers(props) {
   )
 }
 CheckServers.propTypes = {
-  isErr: PropTypes.bool.isRequired,
+  isLoadingErr: PropTypes.bool.isRequired,
   isServersLoading: PropTypes.bool.isRequired,
   isAppsLoading: PropTypes.bool.isRequired,
   isChecking: PropTypes.bool.isRequired,

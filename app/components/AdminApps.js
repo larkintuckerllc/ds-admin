@@ -2,7 +2,7 @@ var React = require('react');
 var AdminApp = require('./AdminApp');
 var PropTypes = React.PropTypes;
 function AdminApps(props) {
-  if (props.isServersLoading || props.isAppsLoading || props.isErr) {
+  if (props.isServersLoading || props.isAppsLoading || props.isLoadingErr) {
     return (
       <div></div>
     );
@@ -27,7 +27,7 @@ function AdminApps(props) {
     </div>);
 }
 AdminApps.propTypes = {
-  isErr: PropTypes.bool.isRequired,
+  isLoadingErr: PropTypes.bool.isRequired,
   isServersLoading: PropTypes.bool.isRequired,
   isAppsLoading: PropTypes.bool.isRequired,
   apps: PropTypes.array.isRequired

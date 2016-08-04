@@ -1,15 +1,15 @@
 var React = require('react');
-var UserApp = require('./UserApp');
+var UserAppContainer = require('../containers/UserAppContainer');
 var PropTypes = React.PropTypes;
 function UserApps(props) {
-  if (props.isServersLoading || props.isAppsLoading || props.isErr) {
+  if (props.isServersLoading || props.isAppsLoading || props.isLoadingErr) {
     return (
       <div></div>
     );
   }
   var appEls = props.apps.map(function(app) {
      return (
-       <UserApp
+       <UserAppContainer
          key={app.user + '-' + app.repo}
          user={app.user}
          repo={app.repo}
@@ -27,7 +27,7 @@ function UserApps(props) {
     </div>);
 }
 UserApps.propTypes = {
-  isErr: PropTypes.bool.isRequired,
+  isLoadingErr: PropTypes.bool.isRequired,
   isServersLoading: PropTypes.bool.isRequired,
   isAppsLoading: PropTypes.bool.isRequired,
   apps: PropTypes.array.isRequired
