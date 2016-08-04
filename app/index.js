@@ -48,10 +48,8 @@ function loadReact() {
   var Checking = require('./components/Checking');
   var CheckServers = require('./components/CheckServers');
   var ServersUpToDate = require('./components/ServersUpToDate');
-  var ServersOutOfDate = require('./components/ServersOutOfDate');
-  var AppsUpToDate = require('./components/AppsUpToDate');
-  var AppsOutOfDate = require('./components/AppsOutOfDate');
   var CheckApps = require('./components/CheckApps');
+  var AppsUpToDate = require('./components/AppsUpToDate');
   var filter = require('lodash/filter');
   var Home = React.createClass({
     handleCheckServers: function() {
@@ -146,14 +144,18 @@ function loadReact() {
       function check() {
         var j;
         var app;
+        var updatedApps = [];
         var appsUpToDate = true;
         for (j = 0; j < this.state.apps.length; j++) {
           app = this.state.apps[j];
+          app.isAppChecked = true;
+          app.isAppUpToDate = !appsOutOfDate[app.user + '-' + app.repo];
+          updatedApps.push(app);
           appsUpToDate = !appsOutOfDate[app.user + '-' + app.repo] ?
             false : appsUpToDate;
-          // TODO: UPDATE APPS WITH INFO
         }
         this.setState({
+          apps: updatedApps,
           isChecking: false,
           isAppsChecked: true,
           isAppsUpToDate: appsUpToDate
@@ -217,8 +219,13 @@ function loadReact() {
           });
           return;
         }
+
         this.setState({
-          apps: list
+          apps: list.map(function(o) {
+            o.isAppChecked = false;
+            o.isAppUpToDate = false;
+            return o;
+          })
         });
       }.bind(this));
     },
@@ -236,7 +243,9 @@ function loadReact() {
             isErr={this.state.isErr}
             isServersLoading={this.state.isServersLoading}
             isAppsLoading={this.state.isAppsLoading}
-            servers={this.state.servers} />
+            servers={this.state.servers}
+            isServersChecked={this.state.isServersChecked}
+            isServersUpToDate={this.state.isServersUpToDate} />
           <AdminApps
             isErr={this.state.isErr}
             isServersLoading={this.state.isServersLoading}
@@ -259,20 +268,10 @@ function loadReact() {
             )} />
           <ServersUpToDate
             isServersChecked={this.state.isServersChecked}
-            isServersUpToDate={this.state.isServersUpToDate}
-            />
-          <ServersOutOfDate
-            isServersChecked={this.state.isServersChecked}
-            isServersUpToDate={this.state.isServersUpToDate}
-            />
+            isServersUpToDate={this.state.isServersUpToDate} />
           <AppsUpToDate
             isAppsChecked={this.state.isAppsChecked}
-            isAppsUpToDate={this.state.isAppsUpToDate}
-            />
-          <AppsOutOfDate
-            isAppsChecked={this.state.isAppsChecked}
-            isAppsUpToDate={this.state.isAppsUpToDate}
-            />
+            isAppsUpToDate={this.state.isAppsUpToDate} />
           <Checking
             isChecking={this.state.isChecking} />
           <CheckServers

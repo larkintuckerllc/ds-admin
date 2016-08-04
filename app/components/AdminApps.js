@@ -1,7 +1,7 @@
 var React = require('react');
 var AdminApp = require('./AdminApp');
 var PropTypes = React.PropTypes;
-function UserApps(props) {
+function AdminApps(props) {
   if (props.isServersLoading || props.isAppsLoading || props.isErr) {
     return (
       <div></div>
@@ -13,7 +13,9 @@ function UserApps(props) {
          key={app.user + '-' + app.repo}
          user={app.user}
          repo={app.repo}
-         version={app.version} />
+         version={app.version}
+         isAppChecked={app.isAppChecked}
+         isAppUpToDate={app.isAppUpToDate} />
      );
    });
   return (
@@ -24,10 +26,10 @@ function UserApps(props) {
       </ul>
     </div>);
 }
-UserApps.propTypes = {
+AdminApps.propTypes = {
   isErr: PropTypes.bool.isRequired,
   isServersLoading: PropTypes.bool.isRequired,
   isAppsLoading: PropTypes.bool.isRequired,
   apps: PropTypes.array.isRequired
 };
-module.exports = UserApps;
+module.exports = AdminApps;

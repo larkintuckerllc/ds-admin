@@ -13,7 +13,9 @@ function UserApps(props) {
          key={app.user + '-' + app.repo}
          user={app.user}
          repo={app.repo}
-         version={app.version} />
+         version={app.version}
+         isAppChecked={app.isAppChecked}
+         isAppUpToDate={app.isAppUpToDate} />
      );
    });
   return (

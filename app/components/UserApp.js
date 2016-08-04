@@ -11,6 +11,8 @@ function UserApp(props) {
 UserApp.propTypes = {
   user: PropTypes.string.isRequired,
   repo: PropTypes.string.isRequired,
-  version: PropTypes.string.isRequired
+  version: PropTypes.string.isRequired,
+  isAppChecked: PropTypes.bool.isRequired,
+  isAppUpToDate: PropTypes.bool.isRequired
 };
 module.exports = UserApp;

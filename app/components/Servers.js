@@ -1,6 +1,7 @@
 var React = require('react');
 var Server = require('./Server');
 var PropTypes = React.PropTypes;
+var ServersOutOfDate = require('./ServersOutOfDate');
 function Servers(props) {
   if (props.isServersLoading || props.isAppsLoading || props.isErr) {
     return (
@@ -18,7 +19,12 @@ function Servers(props) {
    });
   return (
     <div className="panel panel-default">
-      <div className="panel-heading"><h3 className="panel-title">Servers</h3></div>
+      <div className="panel-heading">
+        <h3 className="panel-title">Servers</h3>
+        <ServersOutOfDate
+          isServersChecked={props.isServersChecked}
+          isServersUpToDate={props.isServersUpToDate} />
+      </div>
       <ul className="list-group">
         {serverEls}
       </ul>
@@ -28,6 +34,8 @@ Servers.propTypes = {
   isErr: PropTypes.bool.isRequired,
   isServersLoading: PropTypes.bool.isRequired,
   isAppsLoading: PropTypes.bool.isRequired,
-  servers: PropTypes.array.isRequired
+  isServersChecked: PropTypes.bool.isRequired,
+  isServersUpToDate: PropTypes.bool.isRequired,
+  servers: PropTypes.array.isRequired,
 };
 module.exports = Servers;

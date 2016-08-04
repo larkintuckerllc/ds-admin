@@ -7,7 +7,10 @@ function ServersOutOfDate(props) {
     );
   }
   return (
-    <div className="alert alert-warning" role="alert"><strong>Servers out of date...</strong></div>
+    <div>
+      <p></p>
+      <div className="alert alert-warning" role="alert"><strong>Servers out of date...</strong></div>
+    </div>
   )
 }
 ServersOutOfDate.propTypes = {
