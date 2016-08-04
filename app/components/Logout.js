@@ -5,7 +5,9 @@ function Logout(props) {
     <div className="container-fluid">
       <div className="row">
         <div className="col-xs-12">
-          <button type="button" className="btn btn-default" onClick={props.onLogout}>Logout</button>
+          <div className="form-group">
+            <button type="button" className="btn btn-default" onClick={props.onLogout}>Logout</button>
+          </div>
         </div>
       </div>
     </div>

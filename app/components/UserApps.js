@@ -2,19 +2,17 @@ var React = require('react');
 var UserApp = require('./UserApp');
 var PropTypes = React.PropTypes;
 function UserApps(props) {
-  if (props.isLoading) {
+  if (props.isServersLoading || props.isAppsLoading) {
     return (
-      <div className="alert alert-info" role="alert">
-        <strong>Loading...</strong>
-      </div>);
+      <div></div>
+    );
   }
   if (props.isErr) {
     return (
-      <div className="alert alert-danger" role="alert">
-        <strong>Failed to load...</strong>
-      </div>);
+      <div></div>
+    );
   }
-  var apps = props.apps.map(function(app) {
+  var appEls = props.apps.map(function(app) {
      return (
        <UserApp
          key={app.user + '-' + app.repo}
@@ -27,13 +25,14 @@ function UserApps(props) {
     <div className="panel panel-default">
       <div className="panel-heading"><h3 className="panel-title">User Applications</h3></div>
       <ul className="list-group">
-        {apps}
+        {appEls}
       </ul>
     </div>);
 }
 UserApps.propTypes = {
-  isLoading: PropTypes.bool.isRequired,
   isErr: PropTypes.bool.isRequired,
+  isServersLoading: PropTypes.bool.isRequired,
+  isAppsLoading: PropTypes.bool.isRequired,
   apps: PropTypes.array.isRequired
 };
 module.exports = UserApps;
