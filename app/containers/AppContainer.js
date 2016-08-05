@@ -88,6 +88,7 @@ var AppContainer = React.createClass({
   render: function() {
     return (
       <App
+        type={this.props.type}
         user={this.props.user}
         repo={this.props.repo}
         updatedVersion={this.state.updatedVersion}
@@ -100,6 +101,7 @@ var AppContainer = React.createClass({
     );
   },
   propTypes: {
+    type: PropTypes.string.isRequired,
     user: PropTypes.string.isRequired,
     repo: PropTypes.string.isRequired,
     version: PropTypes.string.isRequired,
