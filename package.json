@@ -1,6 +1,6 @@
 {
   "name": "ds-admin",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "",
   "main": "index.html",
   "scripts": {
@@ -9,7 +9,7 @@
     "postinstall": "bower install"
   },
   "author": "",
-  "license": "ISC",
+  "license": "LicenseRef-LICENSE",
   "dependencies": {
     "bootstrap": "^3.3.7",
     "lodash": "^4.14.1",

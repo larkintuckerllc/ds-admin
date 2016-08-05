@@ -7,9 +7,10 @@ var LogoutContainer = React.createClass({
     ds.logout();
   },
   render: function() {
+    var self = this;
     return (
       <Logout
-        onLogout={this.handleLogout}/>
+        onLogout={self.handleLogout}/>
     );
   }
 });

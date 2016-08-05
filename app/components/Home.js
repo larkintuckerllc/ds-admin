@@ -8,27 +8,27 @@ var PropTypes = React.PropTypes;
 function Home(props) {
   var loadingEl = (!props.isLoadingErr && (props.isServersLoading || props.isAppsLoading)) ?
     <div className="alert alert-info" role="alert"><strong>Loading...</strong></div> :
-    <div></div>;
+    null;
   var loadingErrEl = props.isLoadingErr ?
     <div className="alert alert-danger" role="alert"><strong>Failed to load...</strong></div> :
-    <div></div>;
+    null;
   var serversUpToDateEl = props.isServersChecked && props.isServersUpToDate ?
     <div className="alert alert-success" role="alert"><strong>Servers up to date...</strong></div> :
-    <div></div>;
+    null;
   var appsUpToDateEl = props.isAppsChecked && props.isAppsUpToDate ?
     <div className="alert alert-success" role="alert"><strong>Apps up to date...</strong></div> :
-    <div></div>;
+    null;
   var checkingEl = props.isChecking ?
     <div className="alert alert-info" role="alert"><strong>Checking...</strong></div> :
-    <div></div>;
+    null;
   var checkingErrEl = props.isCheckingErr ?
     <div className="alert alert-danger" role="alert"><strong>Failed to check...</strong></div> :
-    <div></div>;
+    null;
   var serverEls = props.servers.map(function(server) {
     return (
       <li className="list-group-item" key={server.user + '-' + server.repo}>
-        <span className="badge">{server.version}</span>
         <strong>{server.repo}</strong> ({server.user})
+        <div>Version: {server.version}</div>
       </li>
     );
   });
@@ -37,7 +37,7 @@ function Home(props) {
       <p></p>
       <div className="alert alert-warning" role="alert"><strong>Servers out of date...</strong></div>
     </div> :
-    <div></div>;
+    null;
   var serversEl = (!props.isServersLoading && !props.isAppsLoading && !props.isLoadingErr) ?
     <div className="panel panel-default">
       <div className="panel-heading">
@@ -48,7 +48,7 @@ function Home(props) {
         {serverEls}
       </ul>
     </div> :
-    <div></div>;
+    null;
   var adminAppEls = filter(
     props.apps,
     function(o) {
@@ -56,14 +56,17 @@ function Home(props) {
     }
   ).map(function(app) {
     return (
-     <AppContainer
-       key={app.user + '-' + app.repo}
-       type="admin"
-       user={app.user}
-       repo={app.repo}
-       version={app.version}
-       isAppChecked={app.isAppChecked}
-       isAppUpToDate={app.isAppUpToDate} />
+      <li className="list-group-item"
+        key={app.user + '-' + app.repo}>
+        <div><strong>{app.repo}</strong> ({app.user})</div>
+        <AppContainer
+         key={app.user + '-' + app.repo}
+         user={app.user}
+         repo={app.repo}
+         version={app.version}
+         isAppChecked={app.isAppChecked}
+         isAppUpToDate={app.isAppUpToDate} />
+      </li>
     );
   });
   var adminAppsEl = (!props.isServersLoading && !props.isAppsLoading && !props.isLoadingErr) ?
@@ -73,22 +76,36 @@ function Home(props) {
         {adminAppEls}
       </ul>
     </div> :
-    <div></div>;
+    null;
   var userAppEls = filter(
     props.apps,
     function(o) {
       return !(o.user === DS_ADMIN_USER && o.repo === DS_ADMIN_REPO);
     }
   ).map(function(app) {
+    var appLinksEl = app.isActive ?
+      <div>
+        <a href={'/' + app.user + '-' + app.repo + '/dist/restart/'} target="_blank">Restart</a>
+          &nbsp;|&nbsp;<a href={'/' + app.user + '-' + app.repo + '/dist/config/'} target="_blank">Configure</a>
+        &nbsp;|&nbsp;<a href={'/' + app.user + '-' + app.repo + '/dist/control/'} target="_blank">Control</a>
+      </div> :
+      null;
+    var appActivateEl = !app.isActive ?
+      <button type="button" className="pull-right btn btn-default btn-sm" onClick={props.onActivate.bind(null, app.user, app.repo)}>Activate</button> :
+      null;
     return (
-     <AppContainer
-       key={app.user + '-' + app.repo}
-       type="user"
-       user={app.user}
-       repo={app.repo}
-       version={app.version}
-       isAppChecked={app.isAppChecked}
-       isAppUpToDate={app.isAppUpToDate} />
+      <li className="list-group-item"
+        key={app.user + '-' + app.repo}>
+        {appActivateEl}
+        <div><strong>{app.repo}</strong> ({app.user})</div>
+        {appLinksEl}
+         <AppContainer
+           user={app.user}
+           repo={app.repo}
+           version={app.version}
+           isAppChecked={app.isAppChecked}
+           isAppUpToDate={app.isAppUpToDate} />
+      </li>
     );
   });
   var userAppsEl = (!props.isServersLoading && !props.isAppsLoading && !props.isLoadingErr) ?
@@ -98,7 +115,7 @@ function Home(props) {
         {userAppEls}
       </ul>
     </div> :
-    <div></div>;
+    null;
   var checkServersEl = (!props.isServersLoading && !props.isAppsLoading
     && !props.isLoadingErr && !props.isChecking && !props.isServersChecked) ?
     <div className="container-fluid">
@@ -110,7 +127,7 @@ function Home(props) {
         </div>
       </div>
     </div> :
-    <div></div>;
+    null;
   var checkAppsEl = (props.isServersChecked && props.isServersUpToDate
     && !props.isChecking && !props.isAppsChecked) ?
     <div className="container-fluid">
@@ -122,7 +139,7 @@ function Home(props) {
         </div>
       </div>
     </div> :
-    <div></div>;
+    null;
   return (
     <div>
       <div className="panel panel-default">
@@ -158,6 +175,7 @@ Home.propTypes = {
   servers: PropTypes.array.isRequired,
   apps: PropTypes.array.isRequired,
   onCheckServers: PropTypes.func.isRequired,
-  onCheckApps: PropTypes.func.isRequired
+  onCheckApps: PropTypes.func.isRequired,
+  onActivate: PropTypes.func.isRequired
 };
 module.exports = Home;

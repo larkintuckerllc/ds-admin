@@ -1,7 +1,7 @@
 {
   "name": "ds-admin",
   "description": "",
-  "main": "index.html",
+  "main": "dist/index.html",
   "authors": [
     "John Tucker <john@larkintuckerllc.com>"
   ],

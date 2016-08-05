@@ -9,49 +9,67 @@ var ds = require('../../bower_components/ds-client/dist/ds-base.js');
 var Home = require('../components/Home');
 var octo = new Octokat();
 var HomeContainer = React.createClass({
+  handleActivate: function(user, repo) {
+    var self = this;
+    ds.setStartup(user + '-' + repo + '/dist/', function(err) {
+      if (err !== null) {
+        self.setState({
+          isLoadingErr: true
+        });
+        return;
+      }
+      self.setState({
+        apps: self.state.apps.map(function(o) {
+          o.isActive = (o.user === user && o.repo === repo);
+          return o;
+        })
+      });
+    });
+  },
   handleCheckServers: function() {
+    var self = this;
     var dsLatestVersion;
     var thr0wLatestVersion;
-    this.setState({
+    self.setState({
       isChecking: true
     });
-    getDsServerVersion.bind(this)();
+    getDsServerVersion();
     function getDsServerVersion() {
       octo.repos(DS_SERVER_USER, DS_SERVER_REPO)
         .releases.latest.fetch(
           function(err, release) {
             if (err) {
-              this.setState({
+              self.setState({
                 isChecking: false,
                 isCheckingErr: true
               });
               return;
             }
             dsLatestVersion = release.tagName;
-            getThr0wServerVersion.bind(this)();
-          }.bind(this)
+            getThr0wServerVersion();
+          }
         );
     }
     function getThr0wServerVersion() {
       octo.repos(THR0W_SERVER_USER, THR0W_SERVER_REPO)
         .releases.latest.fetch(
           function(err, release) {
-            this.setState({
+            self.setState({
               isChecking: false
             });
             if (err) {
-              this.setState({
+              self.setState({
                 isCheckingErr: true
               });
               return;
             }
             thr0wLatestVersion = release.tagName;
-            check.bind(this)();
-          }.bind(this)
+            check()
+          }
         );
     }
     function check() {
-      var servers = this.state.servers;
+      var servers = self.state.servers;
       var dsUpToDate;
       var thr0wUpToDate;
       dsUpToDate = (dsLatestVersion === find(servers, function(o){
@@ -60,31 +78,32 @@ var HomeContainer = React.createClass({
       thr0wUpToDate = (thr0wLatestVersion === find(servers, function(o){
         return (o.user === THR0W_SERVER_USER && o.repo === THR0W_SERVER_REPO);
       }).version);
-      this.setState({
+      self.setState({
         isServersChecked: true,
         isServersUpToDate: dsUpToDate && thr0wUpToDate
       });
     }
   },
   handleCheckApps: function() {
+    var self = this;
     var i;
     var numberOfCheckedApps = 0;
     var appsOutOfDate = {};
-    this.setState({
+    self.setState({
       isChecking: true
     });
-    for (i = 0; i < this.state.apps.length; i++) {
-      checkApp.bind(this)(i);
+    for (i = 0; i < self.state.apps.length; i++) {
+      checkApp(i);
     }
     function checkApp(index) {
-      var app = this.state.apps[index];
+      var app = self.state.apps[index];
       octo.repos(app.user, app.repo).
         releases.latest.fetch(function(err, release) {
-          if (this.state.isCheckingErr) {
+          if (self.state.isCheckingErr) {
             return;
           }
           if (err !== null) {
-            this.setState({
+            self.setState({
               isChecking: false,
               isCheckingErr: true
             });
@@ -93,25 +112,25 @@ var HomeContainer = React.createClass({
           numberOfCheckedApps++;
           appsOutOfDate[app.user + '-' + app.repo] =
             (app.version !== release.tagName);
-          if (numberOfCheckedApps === this.state.apps.length) {
-            check.bind(this)();
+          if (numberOfCheckedApps === self.state.apps.length) {
+            check();
           }
-        }.bind(this));
+        });
     }
     function check() {
       var j;
       var app;
       var updatedApps = [];
       var appsUpToDate = true;
-      for (j = 0; j < this.state.apps.length; j++) {
-        app = this.state.apps[j];
+      for (j = 0; j < self.state.apps.length; j++) {
+        app = self.state.apps[j];
         app.isAppChecked = true;
         app.isAppUpToDate = !appsOutOfDate[app.user + '-' + app.repo];
         updatedApps.push(app);
         appsUpToDate = !appsOutOfDate[app.user + '-' + app.repo] ?
           false : appsUpToDate;
       }
-      this.setState({
+      self.setState({
         apps: updatedApps,
         isChecking: false,
         isAppsChecked: true,
@@ -135,20 +154,21 @@ var HomeContainer = React.createClass({
     });
   },
   componentDidMount: function () {
+    var self = this;
     ds.getServerVersions(function(err, versions) {
-      this.setState({
+      self.setState({
         isServersLoading: false
       });
-      if (this.state.isLoadingErr) {
+      if (self.state.isLoadingErr) {
         return;
       }
       if (err !== null) {
-        this.setState({
+        self.setState({
           isLoadingErr: true
         });
         return;
       }
-      this.setState({
+      self.setState({
         servers: [
           {
             user: 'larkintuckerllc',
@@ -162,45 +182,59 @@ var HomeContainer = React.createClass({
           },
         ]
       });
-    }.bind(this));
-    ds.list(function(err, list) {
-      this.setState({
-        isAppsLoading: false,
-      });
-      if (this.state.isLoadingErr) {
+    });
+    ds.getStartup(function(getStartupErr, startupUrl) {
+      if (self.state.isLoadingErr) {
         return;
       }
-      if (err !== null) {
-        this.setState({
+      if (getStartupErr !== null) {
+        self.setState({
+          isAppsLoading: false,
           isLoadingErr: true
         });
-        return;
       }
-      this.setState({
-        apps: list.map(function(o) {
-          o.isAppChecked = false;
-          o.isAppUpToDate = false;
-          return o;
-        })
+      ds.list(function(listErr, list) {
+        self.setState({
+          isAppsLoading: false,
+        });
+        if (self.state.isLoadingErr) {
+          return;
+        }
+        if (listErr !== null) {
+          self.setState({
+            isLoadingErr: true
+          });
+          return;
+        }
+        self.setState({
+          apps: list.map(function(o) {
+            o.isAppChecked = false;
+            o.isAppUpToDate = false;
+            o.isActive = (startupUrl === o.user + '-' + o.repo + '/dist/');
+            return o;
+          })
+        });
       });
-    }.bind(this));
+    });
   },
   render: function() {
+    var self = this;
     return(
       <Home
-        isLoadingErr={this.state.isLoadingErr}
-        isServersLoading={this.state.isServersLoading}
-        isAppsLoading={this.state.isAppsLoading}
-        isChecking={this.state.isChecking}
-        isCheckingErr={this.state.isCheckingErr}
-        isServersChecked={this.state.isServersChecked}
-        isServersUpToDate={this.state.isServersUpToDate}
-        isAppsChecked={this.state.isAppsChecked}
-        isAppsUpToDate={this.state.isAppsUpToDate}
-        servers={this.state.servers}
-        apps={this.state.apps}
-        onCheckServers={this.handleCheckServers}
-        onCheckApps={this.handleCheckApps} />
+        isLoadingErr={self.state.isLoadingErr}
+        isServersLoading={self.state.isServersLoading}
+        isAppsLoading={self.state.isAppsLoading}
+        isChecking={self.state.isChecking}
+        isCheckingErr={self.state.isCheckingErr}
+        isServersChecked={self.state.isServersChecked}
+        isServersUpToDate={self.state.isServersUpToDate}
+        isAppsChecked={self.state.isAppsChecked}
+        isAppsUpToDate={self.state.isAppsUpToDate}
+        servers={self.state.servers}
+        apps={self.state.apps}
+        onCheckServers={self.handleCheckServers}
+        onCheckApps={self.handleCheckApps}
+        onActivate={self.handleActivate} />
     );
   }
 });

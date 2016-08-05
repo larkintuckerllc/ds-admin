@@ -5,12 +5,13 @@ var ds = require('../../bower_components/ds-client/dist/ds-base.js');
 var findIndex = require('lodash/findIndex');
 var AppContainer = React.createClass({
   handleUpdate: function() {
-    this.setState({
+    var self = this;
+    self.setState({
       isAppUpdating: true
     });
-    ds.update(this.props.user, this.props.repo, function(updateErr) {
+    ds.update(self.props.user, self.props.repo, function(updateErr) {
       if (updateErr !== null) {
-        this.setState({
+        self.setState({
           isAppUpdating: false,
           isAppUpdatingErr: true
         });
@@ -18,12 +19,12 @@ var AppContainer = React.createClass({
       }
       var progressCount = 0;
       var updateProgressInterval =
-        window.setInterval(updateProgress.bind(this), 1000);
+        window.setInterval(updateProgress, 1000);
       function updateProgress() {
         progressCount++;
         if (progressCount === 20) {
           window.clearInterval(updateProgressInterval);
-          this.setState({
+          self.setState({
             isAppUpdating: false,
             isAppUpdatingErr: true
           });
@@ -32,7 +33,7 @@ var AppContainer = React.createClass({
         ds.list(function(listErr, list) {
           if (listErr !== null) {
             window.clearInterval(updateProgressInterval);
-            this.setState({
+            self.setState({
               isAppUpdating: false,
               isAppUpdatingErr: true
             });
@@ -40,13 +41,13 @@ var AppContainer = React.createClass({
           }
           var updatedVersion;
           var index = findIndex(list, function(o) {
-            return (o.user === this.props.user &&
-              o.repo === this.props.repo);
-          }.bind(this));
+            return (o.user === self.props.user &&
+              o.repo === self.props.repo);
+          });
           // NOT IN LIST
           if (index === -1) {
             window.clearInterval(updateProgressInterval);
-            this.setState({
+            self.setState({
               isAppUpdating: false,
               isAppUpdatingErr: true
             });
@@ -60,7 +61,7 @@ var AppContainer = React.createClass({
           // FAILED UPDATE
           if (updatedVersion === 'failed') {
             window.clearInterval(updateProgressInterval);
-            this.setState({
+            self.setState({
               isAppUpdating: false,
               isAppUpdatingErr: true
             });
@@ -68,40 +69,40 @@ var AppContainer = React.createClass({
           }
           window.clearInterval(updateProgressInterval);
           // SUCCESSFUL UPDATE
-          this.setState({
+          self.setState({
             isAppUpdating: false,
             isAppUpdated: true,
             updatedVersion: updatedVersion
           });
-        }.bind(this));
+        });
       }
-    }.bind(this));
+    });
   },
   getInitialState: function() {
+    var self = this;
     return {
       isAppUpdating: false,
       isAppUpdatingErr: false,
       isAppUpdated: false,
-      updatedVersion: this.props.version
+      updatedVersion: self.props.version
     };
   },
   render: function() {
+    var self = this;
     return (
       <App
-        type={this.props.type}
-        user={this.props.user}
-        repo={this.props.repo}
-        updatedVersion={this.state.updatedVersion}
-        isAppChecked={this.props.isAppChecked}
-        isAppUpToDate={this.props.isAppUpToDate}
-        isAppUpdating={this.state.isAppUpdating}
-        isAppUpdatingErr={this.state.isAppUpdatingErr}
-        isAppUpdated={this.state.isAppUpdated}
-        onUpdate={this.handleUpdate} />
+        user={self.props.user}
+        repo={self.props.repo}
+        updatedVersion={self.state.updatedVersion}
+        isAppChecked={self.props.isAppChecked}
+        isAppUpToDate={self.props.isAppUpToDate}
+        isAppUpdating={self.state.isAppUpdating}
+        isAppUpdatingErr={self.state.isAppUpdatingErr}
+        isAppUpdated={self.state.isAppUpdated}
+        onUpdate={self.handleUpdate} />
     );
   },
   propTypes: {
-    type: PropTypes.string.isRequired,
     user: PropTypes.string.isRequired,
     repo: PropTypes.string.isRequired,
     version: PropTypes.string.isRequired,
