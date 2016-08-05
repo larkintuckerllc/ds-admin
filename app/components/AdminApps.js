@@ -1,5 +1,5 @@
 var React = require('react');
-var AdminApp = require('./AdminApp');
+var AppContainer = require('../containers/AppContainer');
 var PropTypes = React.PropTypes;
 function AdminApps(props) {
   if (props.isServersLoading || props.isAppsLoading || props.isLoadingErr) {
@@ -9,7 +9,7 @@ function AdminApps(props) {
   }
   var appEls = props.apps.map(function(app) {
      return (
-       <AdminApp
+       <AppContainer
          key={app.user + '-' + app.repo}
          user={app.user}
          repo={app.repo}

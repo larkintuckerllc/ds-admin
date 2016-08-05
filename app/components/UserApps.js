@@ -1,5 +1,5 @@
 var React = require('react');
-var UserAppContainer = require('../containers/UserAppContainer');
+var AppContainer = require('../containers/AppContainer');
 var PropTypes = React.PropTypes;
 function UserApps(props) {
   if (props.isServersLoading || props.isAppsLoading || props.isLoadingErr) {
@@ -9,7 +9,7 @@ function UserApps(props) {
   }
   var appEls = props.apps.map(function(app) {
      return (
-       <UserAppContainer
+       <AppContainer
          key={app.user + '-' + app.repo}
          user={app.user}
          repo={app.repo}

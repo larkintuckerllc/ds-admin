@@ -135,9 +135,8 @@ function loadReact() {
               return;
             }
             numberOfCheckedApps++;
-            // TODO: REVERSE LOGIC HERE
             appsOutOfDate[app.user + '-' + app.repo] =
-              (app.version === release.tagName);
+              (app.version !== release.tagName);
             if (numberOfCheckedApps === this.state.apps.length) {
               check.bind(this)();
             }

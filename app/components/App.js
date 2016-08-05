@@ -4,7 +4,7 @@ var AppUpdatingError = require('./AppUpdatingError');
 var AppUpdated = require('./AppUpdated');
 var AppOutOfDate = require('./AppOutOfDate');
 var PropTypes = React.PropTypes;
-function UserApp(props) {
+function App(props) {
   return(
     <li className="list-group-item">
       <span className="badge">{props.updatedVersion}</span>
@@ -24,7 +24,7 @@ function UserApp(props) {
     </li>
   );
 }
-UserApp.propTypes = {
+App.propTypes = {
   user: PropTypes.string.isRequired,
   repo: PropTypes.string.isRequired,
   updatedVersion: PropTypes.string.isRequired,
@@ -35,4 +35,4 @@ UserApp.propTypes = {
   isAppUpdated: PropTypes.bool.isRequired,
   onUpdate: PropTypes.func.isRequired
 };
-module.exports = UserApp;
+module.exports = App;
