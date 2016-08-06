@@ -127,8 +127,8 @@ var HomeContainer = React.createClass({
         app.isAppChecked = true;
         app.isAppUpToDate = !appsOutOfDate[app.user + '-' + app.repo];
         updatedApps.push(app);
-        appsUpToDate = !appsOutOfDate[app.user + '-' + app.repo] ?
-          false : appsUpToDate;
+        appsUpToDate = app.isAppUpToDate ?
+          appsUpToDate : false;
       }
       self.setState({
         apps: updatedApps,
